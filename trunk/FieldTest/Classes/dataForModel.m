@@ -132,6 +132,8 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(dataForModel);
 
 @synthesize notificationCount;
 @synthesize latitude,longitude;
+@synthesize currReading;
+
 //@synthesize rememberMeSwitch;
 
 - (id)initWithCoder:(NSCoder *)coder;

@@ -7,10 +7,22 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "dataForModel.h"
+#import "SQLManager.h"
 
 @interface TowerInfoViewController : UIViewController {
 	UITextView *infoView;
 	UITextField *inputField;
+	dataForModel *model;
+	SQLManager	*sqlManager;
+	int totalReadings;
+	
+	UILabel		*numOfReadings;
+	UILabel		*signalStrength;
+	UILabel		*neighbourCells;
+	UILabel		*accessTech;
+	UILabel		*lati;
+	UILabel		*longi;
 
 }
 
@@ -20,6 +32,13 @@
 
 @property (nonatomic, retain) IBOutlet UITextView *infoView;
 @property (nonatomic, retain) IBOutlet UITextField *inputField;
+
+@property (nonatomic, retain) IBOutlet UILabel		*numOfReadings;
+@property (nonatomic, retain) IBOutlet UILabel		*signalStrength;
+@property (nonatomic, retain) IBOutlet UILabel		*neighbourCells;
+@property (nonatomic, retain) IBOutlet UILabel		*accessTech;
+@property (nonatomic, retain) IBOutlet UILabel		*lati;
+@property (nonatomic, retain) IBOutlet UILabel		*longi;
 
 @end
 
