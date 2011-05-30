@@ -7,9 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "dataForModel.h"
 
 
 @interface workerThread : NSObject {
+    bool isServingCell;
+    int neighboureNumber;
+	bool isPLMN;
+	dataForModel *model;
 	
 
 }

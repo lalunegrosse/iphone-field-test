@@ -37,12 +37,13 @@
 -(void) getToWork
 {
 	NSLog(@"thread start to work");
+	model = [dataForModel shareddataForModel];
 	[NSThread detachNewThreadSelector:@selector(startFetchingData) toTarget:self withObject:nil];
-	NSLog(@"thread ending");
 }
 
 -(void) startFetchingData
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	int modem;
 	char cmd[1024];	
 	NSString *responseString;
@@ -58,10 +59,15 @@
 	
 	modem = [self InitConn:115200];
 	
+	while (1) 
+	{
+		isPLMN = FALSE;
+		isServingCell = FALSE;
+		neighboureNumber = 0;
+		
 	NSLog (@"Waiting for modem to be free..");
 	[self AT:modem]; // wait for device to be free, by polling with AT commands.
 	
-	NSLog (@"Requesting Prepaid balance from PCCW..");
 	[self SendStrCmd:modem :cmd];
 	
 	NSMutableArray *lineStrings;
@@ -79,20 +85,522 @@
 				
 				if(startRange.location != NSNotFound)
 				{
-					NSLog(@"found");
                     NSRange endRange = [currString rangeOfString:@"\"," options:NSCaseInsensitiveSearch];
                     int startIndex = startRange.location + 5;
                     int endIndex = endRange.location - startIndex;
-                    //currReading.RAT = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    currReading.RAT = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
                     
 				}
+                
+                startRange = [currString rangeOfString:@"RR:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@"\r" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RR = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"txpwr:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", RxLevServ" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 6;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.txpwr = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"RxLevServ:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", RxQualFull" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 10;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RxLevServ = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"RxQualFull:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", RxQualSub" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 11;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RxQualFull = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"RxQualSub:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@",\r" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 10;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RxQualSub = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"dtx_used:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", drx_used" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 9;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.dtx_used = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] boolValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"drx_used:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@",\r" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 9;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.drx_used = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] boolValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"SFRLC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", RSR" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 6;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.SFRLC = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"RSR:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", RC" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 4;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RSR = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"RC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", LM" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.RC = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"LM:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@"\r" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.LM = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                
+                startRange = [currString rangeOfString:@"GSM Serving Cell:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    isServingCell = YES;
+                    
+				}
+                
+				startRange = [currString rangeOfString:@"Ci:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", B" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    if(neighboureNumber == 1)
+                    {
+                        currReading.Ci_1 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        
+                    }
+                    else if(neighboureNumber ==2)
+                    {
+                        currReading.Ci_2 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber ==3)
+                    {
+                        currReading.Ci_3 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber ==4)
+                    {
+                        currReading.Ci_4 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber ==5)
+                    {
+                        currReading.Ci_5 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber ==6)
+                    {
+                        currReading.Ci_6 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+					
+				}
+				
+                startRange = [currString rangeOfString:@"B:\"" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@"\", Arfcn" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {
+                        currReading.SCG = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 1)
+                    {
+                        currReading.B_1 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 2)
+                    {
+                        currReading.B_2 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 3)
+                    {
+                        currReading.B_3 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 4)
+                    {
+                        currReading.B_4 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 5)
+                    {
+                        currReading.B_5 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 6)
+                    {
+                        currReading.B_6 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"Arfcn:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", Rssi" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 6;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {
+                        currReading.SCArfcn = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 1)
+                    {
+                        currReading.Arfcn_1 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 2)
+                    {
+                        currReading.Arfcn_2 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 3)
+                    {
+                        currReading.Arfcn_3 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 4)
+                    {
+                        currReading.Arfcn_4 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 5)
+                    {
+                        currReading.Arfcn_5 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 6)
+                    {
+                        currReading.Arfcn_6 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+				}
+                
+                startRange = [currString rangeOfString:@"Rssi:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", C1" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 5;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {
+                        currReading.SCRssi = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 1)
+                    {
+                        currReading.Rssi_1 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 2)
+                    {
+                        currReading.Rssi_2 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 3)
+                    {
+                        currReading.Rssi_3 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 4)
+                    {
+                        currReading.Rssi_4 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 5)
+                    {
+                        currReading.Rssi_5 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 6)
+                    {
+                        currReading.Rssi_6 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"C1:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange;
+                    if(isServingCell)
+                    {
+                        endRange = [currString rangeOfString:@", C2" options:NSCaseInsensitiveSearch];
+                    }
+                    else
+                    {
+                        endRange = [currString rangeOfString:@", Bsic" options:NSCaseInsensitiveSearch];
+                    }
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {
+                        currReading.SCC1 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 1)
+                    {
+                        currReading.C1_1 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 2)
+                    {
+                        currReading.C1_2 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 3)
+                    {
+                        currReading.C1_3 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 4)
+                    {
+                        currReading.C1_4 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 5)
+                    {
+                        currReading.C1_5 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+                    else if(neighboureNumber == 6)
+                    {
+                        currReading.C1_6 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+				}
+                
+                startRange = [currString rangeOfString:@"C2:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", Bsic" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {   
+                        currReading.SCC2 = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    }
+				}
+                
+                startRange = [currString rangeOfString:@"Bsic:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange;
+                    if(isServingCell)
+                    {
+                        endRange = [currString rangeOfString:@", MA" options:NSCaseInsensitiveSearch];
+                    }
+                    else
+                    {
+                        endRange = [currString rangeOfString:@"\r" options:NSCaseInsensitiveSearch];
+
+                    }
+                    int startIndex = startRange.location + 5;
+                    int endIndex = endRange.location - startIndex;
+                    if(isServingCell)
+                    {   
+                        currReading.SCBsic = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                    }
+                    else if(neighboureNumber == 1)
+                    {
+                        currReading.Bsic_1 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 2;
+                    }
+                    else if(neighboureNumber == 2)
+                    {
+                        currReading.Bsic_2 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 3;
+                    }
+                    else if(neighboureNumber == 3)
+                    {
+                        currReading.Bsic_3 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 4;
+                    }
+                    else if(neighboureNumber == 4)
+                    {
+                        currReading.Bsic_4 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 5;
+                    }
+                    else if(neighboureNumber == 5)
+                    {
+                        currReading.Bsic_5 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 6;
+                    }
+                    else if(neighboureNumber == 6)
+                    {
+                        currReading.Bsic_6 = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+                        neighboureNumber = 0;
+                    }
+				}
+                
+                startRange = [currString rangeOfString:@"MA:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@", MADed" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 3;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.SCMA = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"MADed:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    NSRange endRange = [currString rangeOfString:@"\r" options:NSCaseInsensitiveSearch];
+                    int startIndex = startRange.location + 6;
+                    int endIndex = endRange.location - startIndex;
+                    currReading.SCMADed = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+                    
+				}
+                
+                startRange = [currString rangeOfString:@"GSM Neighboring Cell:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+                    isServingCell = NO;
+                    neighboureNumber = 1;
+                    
+				}
+                
+               
+				
+				
+				startRange = [currString rangeOfString:@"UMTS Neighboring Cell:" options:NSCaseInsensitiveSearch];
+				if(startRange.location != NSNotFound)
+				{
+					isServingCell = NO;
+					neighboureNumber = 0;
+					
+				}
+				
+				startRange = [currString rangeOfString:@"Serving PLMN:" options:NSCaseInsensitiveSearch];
+				if(startRange.location != NSNotFound)
+				{
+					isPLMN = TRUE;
+					
+				}
+				
+				startRange = [currString rangeOfString:@"MCC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@", MNC" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 4;
+						int endIndex = endRange.location - startIndex;
+						currReading.MCC = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+					}
+                    
+				}
+				
+				startRange = [currString rangeOfString:@"MNC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@", LAC" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 4;
+						int endIndex = endRange.location - startIndex;
+						currReading.MNC = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+					}
+                    
+				}
+				
+				startRange = [currString rangeOfString:@"LAC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@", CI" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 4;
+						int endIndex = endRange.location - startIndex;
+						currReading.LAC = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+					}
+                    
+				}
+				
+				startRange = [currString rangeOfString:@"CI:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@", RAC" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 3;
+						int endIndex = endRange.location - startIndex;
+						currReading.CI = [currString substringWithRange:NSMakeRange(startIndex, endIndex)];
+					}
+                    
+				}
+				
+				startRange = [currString rangeOfString:@"RAC:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@", AcT" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 4;
+						int endIndex = endRange.location - startIndex;
+						currReading.RAC = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+					}
+                    
+				}
+				
+				startRange = [currString rangeOfString:@"AcT:" options:NSCaseInsensitiveSearch];
+                if(startRange.location != NSNotFound)
+				{
+					if(isPLMN)
+					{
+						NSRange endRange = [currString rangeOfString:@"\r" options:NSCaseInsensitiveSearch];
+						int startIndex = startRange.location + 4;
+						int endIndex = endRange.location - startIndex;
+						currReading.AcT = [[currString substringWithRange:NSMakeRange(startIndex, endIndex)] intValue];
+					}
+                    
+				}
+				
 			}
-        }
-		NSLog (@"Skipping:::");
+			if(currReading.SCRssi > 0)
+			{
+				model.currReading = currReading;
+				[[NSNotificationCenter defaultCenter] postNotificationName:@"newReading" object:nil 
+																  userInfo:nil];
+			}
+			
+		}
+		
+		
     }
+	}
 	
 	[self CloseConn:modem];
-	
+	[pool release];
 	NSLog (@"Closing connection:::");
 }
 

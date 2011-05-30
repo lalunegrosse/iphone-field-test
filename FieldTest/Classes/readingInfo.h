@@ -47,7 +47,7 @@
                              GRR_IR_CELL_RESEL_TO_UTRAN	34 
                              STATE RR_INACTIVE	35
                              */
-                             
+    //txpwr:255, RxLevServ:032, RxQualFull:255, RxQualSub:255,
     int		txpwr;      //<txpwr> - Transmit power level of the current connection, range 0-31 (5 bits);
 	int			RxLevServ;  //RxLevserv is the receiving level of the currently serving source cell
 	int			RxQualFull; //<RxQualFull> - Received signal quality on serving cell, measured on all slots; range 0-7;

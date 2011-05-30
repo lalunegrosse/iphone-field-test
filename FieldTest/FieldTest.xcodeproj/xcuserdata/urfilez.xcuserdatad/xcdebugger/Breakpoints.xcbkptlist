@@ -9,11 +9,27 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "Classes/workerThread.m"
-         timestampString = "324677875.805312"
+         timestampString = "327954191.572495"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "87"
-         endingLineNumber = "87">
+         startingLineNumber = "195"
+         endingLineNumber = "195"
+         landmarkName = "-startFetchingData"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "Classes/workerThread.m"
+         timestampString = "327981992.300097"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "440"
+         endingLineNumber = "440"
+         landmarkName = "-startFetchingData"
+         landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>

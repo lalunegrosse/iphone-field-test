@@ -26,6 +26,12 @@
 @implementation TowerInfoViewController
 @synthesize inputField;
 @synthesize infoView;
+@synthesize numOfReadings;
+@synthesize signalStrength;
+@synthesize neighbourCells;
+@synthesize accessTech;
+@synthesize lati;
+@synthesize longi;
 
 
 /*
@@ -46,13 +52,64 @@
 */
 
 
-/*
+
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     [super viewDidLoad];
+	
+	model = [dataForModel shareddataForModel];
+	sqlManager = [SQLManager sharedSQLManager];
+	[sqlManager initilizeDB];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(newReading) name:@"newReading" object:nil];
+	workerThread *wt = [[workerThread alloc] init];
+	[wt getToWork];
 }
-*/
 
+- (void) newReading
+{
+	
+	[self performSelectorOnMainThread:@selector(updateValues) withObject:nil waitUntilDone:NO];
+}
+
+- (void) updateValues
+{
+	totalReadings++;
+	lati.text = model.latitude;
+	longi.text = model.longitude;
+	
+	signalStrength.text = [NSString stringWithFormat:@"%d", model.currReading.SCRssi];
+	accessTech.text = [NSString stringWithFormat:@"%d", model.currReading.AcT];
+	numOfReadings.text = [NSString stringWithFormat:@"%d",totalReadings];
+	
+	if(model.currReading.Rssi_6 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",6];
+	}
+	else if(model.currReading.Rssi_5 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",5];
+	}
+	else if(model.currReading.Rssi_4 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",4];
+	}
+	else if(model.currReading.Rssi_3 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",3];
+	}
+	else if(model.currReading.Rssi_2 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",2];
+	}
+	else if(model.currReading.Rssi_1 > 0)
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",1];
+	}
+	else
+	{
+		neighbourCells.text = [NSString stringWithFormat:@"%d",0];
+	}
+}
 
 /*
 // Override to allow orientations other than the default portrait orientation.

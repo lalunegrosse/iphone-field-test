@@ -21,7 +21,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {    
     
     // Override point for customization after application launch.
-
+	application.idleTimerDisabled = YES; // dont let the iphone go into sleep.
     // Add the tab bar controller's view to the window and display.
     [self.window addSubview:tabBarController.view];
     [self.window makeKeyAndVisible];

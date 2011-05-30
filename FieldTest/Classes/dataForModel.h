@@ -11,6 +11,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <MapKit/MKReverseGeocoder.h>
 #import <MapKit/MapKit.h>
+#import "readingInfo.h"
 
 
 /*----------------------------------------------------------------------
@@ -20,6 +21,7 @@
 
 	NSString				*latitude;
 	NSString				*longitude;
+	readingInfo				*currReading;
 	CLLocationManager		*locationManager;
 	int						notificationCount;
 	
@@ -47,6 +49,7 @@
 @property (nonatomic)			int				notificationCount;
 @property (nonatomic, copy) NSString *latitude;
 @property (nonatomic, copy) NSString *longitude;
+@property (nonatomic, retain) readingInfo *currReading;
 
 
 @end
